@@ -136,11 +136,8 @@ median(data$value_remote - data$value_reported)
 # Next, perform a Wilcoxon test (not t-test, because the distribution is not normal)
 wilcox.test(data$value_remote, data$value_reported, paired = TRUE, conf.int = TRUE)
 
-<<<<<<< HEAD
 # Do the same for large pollution sources (more than 100 Kt per year) only
-=======
 # Do the same for data without Norilsk
->>>>>>> 2a8a721d6f41fdcab8793ab1e3501e31953b14d8
 data %>% 
   dplyr::filter(value_remote > 1e+5) %>% 
   gather(data_source, value, value_remote:value_reported) %>% 
