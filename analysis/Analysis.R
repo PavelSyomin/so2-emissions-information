@@ -157,13 +157,18 @@ data %>%
 data %>% 
   filter(ratio != Inf, ratio < 3) %>% 
   ggplot(aes(x = ratio)) +
-  geom_histogram(binwidth = 0.1, color = "red") +
-  geom_histogram(aes(x = sample_n(sim_data, 205)$ratio), binwidth = .1, color = "green")
+  geom_histogram(binwidth = 0.1, color = "red")
+
+data %>% 
+  filter(value_remote > 0.5e+5) %>% 
+  group_by(year, diff_category) %>% 
+  summarise(n = n()) %>% 
+  spread(diff_category, n)
 
 sim_data <- data.frame(reported = data$value_reported)
 sim_data$diff = rnorm(232, sd = 0.5) * sim_data$reported
 sim_data$remote = sim_data$reported - sim_data$diff
-# sim_data$remote[sim_data$remote < 0] <- 0
+sim_data$remote[sim_data$remote < 0] <- 0
 sim_data$index = (sim_data$remote - sim_data$reported) / (sim_data$remote + sim_data$reported)
 sim_data$ratio <- sim_data$reported / sim_data$remote
 qplot(sim_data$index, geom = "histogram")
@@ -172,6 +177,7 @@ sim_data %>%
   ggplot(aes(x = ratio)) + 
   geom_histogram(binwidth = 0.1)
 
+nrow(sim_data[sim_data$ratio == Inf, ])
 shapiro.test(sim_data$ratio)
 
 wilcox.test(differences$value_remote, differences$value_reported, paired = TRUE, conf.int = TRUE)
