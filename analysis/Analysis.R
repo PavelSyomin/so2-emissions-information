@@ -87,7 +87,6 @@ classify_difference <- function(x) {
   # Adjust a threshold depending on the amount of emissions
   threshold <- 0.67
   if (amount > 1e+5) threshold <- 0.55
-  if (amount < 0.5e+4) threshold <- 0.79
   
   if (ratio < 1 - threshold) return(-1) # Reported is significantly lower than remote
   if (ratio > 1 + threshold) return(1) # Reported is significantly higher than remote
@@ -149,29 +148,31 @@ data %>%
   wilcox.test(value ~ data_source, .,  paired = TRUE, conf.int = TRUE)
 
 
-ggplot() +
-  geom_histogram(aes(x = data$value_remote), binwidth = 10000, fill = "red", alpha = .5) +
-  geom_histogram(aes(x = data$value_reported), binwidth = 10000, fill = "green", alpha = .5)
+data %>% 
+  filter(name != "Norilsk") %>% 
+  gather(data_source, amount, value_reported, value_remote) %>% 
+  ggplot(aes(x = amount, fill = data_source)) +
+  geom_histogram(binwidth = 1e+4, position = position_dodge())
 
-differences %>% 
-  dplyr::filter(diff < 10) %>% 
-  ggplot(aes(x = diff)) +
-  geom_density()
-  
-min(differences$diff)
+data %>% 
+  filter(ratio != Inf, ratio < 3) %>% 
+  ggplot(aes(x = ratio)) +
+  geom_histogram(binwidth = 0.1, color = "red") +
+  geom_histogram(aes(x = sample_n(sim_data, 205)$ratio), binwidth = .1, color = "green")
 
-qplot(differences[differences$value_remote < 1000000, "value_remote"] %>% pull(), geom = "density")
-
-x <- rchisq(10000, 7) * 10000 + 30000
-qplot(x, geom = "density")
-
-sim_data <- data.frame(remote = x)
-sim_data$diff = rnorm(10000, sd = 0.5) * sim_data$remote
-sim_data$reported = sim_data$remote - sim_data$diff
-sim_data$reported[sim_data$reported < 0] <- 0
+sim_data <- data.frame(reported = data$value_reported)
+sim_data$diff = rnorm(232, sd = 0.5) * sim_data$reported
+sim_data$remote = sim_data$reported - sim_data$diff
+# sim_data$remote[sim_data$remote < 0] <- 0
 sim_data$index = (sim_data$remote - sim_data$reported) / (sim_data$remote + sim_data$reported)
-qplot(sim_data$index, geom = "density")
+sim_data$ratio <- sim_data$reported / sim_data$remote
+qplot(sim_data$index, geom = "histogram")
+sim_data %>% 
+  filter(ratio < 3, ratio > -3) %>% 
+  ggplot(aes(x = ratio)) + 
+  geom_histogram(binwidth = 0.1)
 
+shapiro.test(sim_data$ratio)
 
 wilcox.test(differences$value_remote, differences$value_reported, paired = TRUE, conf.int = TRUE)
 median(differences$value_remote)
