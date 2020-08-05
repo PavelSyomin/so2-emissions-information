@@ -127,6 +127,16 @@ data %>%
   group_by(diff_category) %>% 
   summarise(n = n())
 
+table_1 <- data %>% 
+  mutate(amount_group = cut(value_remote, c(0, 50000, 100000, 1e+7), labels = c("lt50", "50to100", "gt100"), include.lowest = TRUE)) %>% 
+  group_by(diff_category, amount_group) %>% 
+  summarise(n = n()) %>% 
+  ungroup() %>% 
+  mutate(diff_category = factor(diff_category, labels = c("lt_remote", "eq_remote", "gt_remote"))) %>% 
+  spread(diff_category, n) %>% 
+  mutate(amount_group = factor(amount_group, labels = c("До 50 тысяч тонн", "От 50 до 100 тысяч тонн", "Больше 100 тысяч тонн"))) %>% 
+  replace_na(replace = list(gt_remote = 0))
+
 # Compare reported and remote emissions as two paired samples
 # First, calculate medians
 median(data$value_remote)
@@ -179,22 +189,3 @@ sim_data %>%
 
 nrow(sim_data[sim_data$ratio == Inf, ])
 shapiro.test(sim_data$ratio)
-
-wilcox.test(differences$value_remote, differences$value_reported, paired = TRUE, conf.int = TRUE)
-median(differences$value_remote)
-median(differences$value_reported)
-
-
-differences <- differences %>% 
-  mutate(diff_cat = if_else((value_remote - value_reported) / value_remote < -0.58, -1,
-                            if_else((value_remote - value_reported) / value_remote > 0.58, 1, 0)))
-table(differences$diff_cat)
-
-
-qplot(data$ratio, geom = "density")
-
-data %>%
-  filter(value_remote < 50000) %>% 
-  mutate(remote_is_lower = if_else(value_remote < value_reported, 1, 0)) %>% 
-  group_by(remote_is_lower) %>% 
-  summarise(n = n())
