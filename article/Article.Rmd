@@ -1,0 +1,24 @@
+---
+title: 
+  ru: "Оценка открытости, доступности и достоверности экологической информации о выбросах диоксида серы в 31 населённом пункте России с помощью данных дистанционного зондирования Земли"
+  en: ""
+author:
+  ru: "Сёмин Павел Олегович"
+  en: "Pavel O. Syomin"
+abstract:
+  ru: ""
+  en: ""
+keywords:
+  ru: ""
+  en: ""
+udk_code: ""
+output:
+  odt_document:
+    reference_odt: reference-styles.odt
+    template: template.opendocument
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, message = FALSE, warning = FALSE)
+library(knitr)
+```

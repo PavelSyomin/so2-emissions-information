@@ -166,8 +166,8 @@ data %>%
   spread(diff_category, n)
 
 sim_data <- data.frame(reported = data$value_reported)
-sim_data$diff = rnorm(232, sd = 0.5) * sim_data$reported
-sim_data$remote = sim_data$reported - sim_data$diff
+sim_data$diff = rnorm(251, sd = 0.5) * sim_data$reported
+sim_data$remote = -50000 + sim_data$reported - sim_data$diff
 sim_data$remote[sim_data$remote < 0] <- 0
 sim_data$index = (sim_data$remote - sim_data$reported) / (sim_data$remote + sim_data$reported)
 sim_data$ratio <- sim_data$reported / sim_data$remote
@@ -192,3 +192,9 @@ table(differences$diff_cat)
 
 
 qplot(data$ratio, geom = "density")
+
+data %>%
+  filter(value_remote < 50000) %>% 
+  mutate(remote_is_lower = if_else(value_remote < value_reported, 1, 0)) %>% 
+  group_by(remote_is_lower) %>% 
+  summarise(n = n())
