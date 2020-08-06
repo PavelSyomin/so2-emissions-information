@@ -95,7 +95,8 @@ classify_difference <- function(x) {
 
 # Calculate reported to remote emissions ratio
 data <- data %>% 
-  mutate(ratio = value_reported / value_remote)
+  mutate(ratio = value_reported / value_remote,
+         diff = value_reported - value_remote)
 
 # Assign one of three categories of difference: reported are significantly lower than remote (-1), reported are significantly higher than remote (1), reported are approximately equal to remote, i. e. the difference is within the uncertainty (0)
 data$diff_category <- apply(select(data, value_remote, ratio), 1, classify_difference)
@@ -137,6 +138,16 @@ table_1 <- data %>%
   mutate(amount_group = factor(amount_group, labels = c("До 50 тысяч тонн", "От 50 до 100 тысяч тонн", "Больше 100 тысяч тонн"))) %>% 
   replace_na(replace = list(gt_remote = 0))
 
+table_2 <- data %>% 
+  mutate(amount_group = cut(value_remote, c(0, 50000, 100000, 1e+7), labels = c("lt50", "50to100", "gt100"), include.lowest = TRUE),
+         reported_is_lower = if_else(diff < 0, 1, 0),
+         amount_group = factor(amount_group, labels = c("До 50 тысяч тонн", "От 50 до 100 тысяч тонн", "Больше 100 тысяч тонн"))) %>% 
+  group_by(amount_group, reported_is_lower) %>% 
+  summarise(n = n()) %>% 
+  ungroup() %>% 
+  spread(reported_is_lower, n) %>% 
+  select(amount_group, reported_is_lower = `1`, reported_is_higher = `0`)
+  
 # Compare reported and remote emissions as two paired samples
 # First, calculate medians
 median(data$value_remote)
@@ -157,12 +168,28 @@ data %>%
   gather(data_source, value, value_remote:value_reported) %>% 
   wilcox.test(value ~ data_source, .,  paired = TRUE, conf.int = TRUE)
 
+median_values_without_Norilsk <- data %>% 
+  filter(name != "Norilsk") %>% 
+  summarise(remote = median(value_remote),
+            reported = median(value_reported))
 
-data %>% 
+plot_1 <- data %>% 
   filter(name != "Norilsk") %>% 
   gather(data_source, amount, value_reported, value_remote) %>% 
   ggplot(aes(x = amount, fill = data_source)) +
-  geom_histogram(binwidth = 1e+4, position = position_dodge())
+  geom_histogram(binwidth = 10000, boundary = 0, position = position_dodge2(padding = .5, width = 2)) +
+  geom_vline(xintercept = median_values_without_Norilsk$remote, color = "#969696", linetype = "dashed", size = 1) +
+  geom_vline(xintercept = median_values_without_Norilsk$reported, color = "#252525", linetype = "dotted", size = 1, show.legend = TRUE) +
+  scale_fill_manual(name = "Источник данных", values = c("#ffffff", "#252525"), labels = c("Дистанционные измерения", "Официальная отчётность")) +
+  scale_linetype_manual(name = "Медиана выбросов", values = c("dotted", "dashed"), labels = c("Дистанционные измерения", "Официальная информация")) +
+  scale_x_continuous(labels = function(x) format(x, scientific = FALSE)) +
+  scale_y_continuous(expand = expand_scale(add = c(0, 3))) +
+  labs(x = "Объём выбросов, тысяч тонн в год", y = "Число источников загрязнения") +
+  theme_bw(base_family = "PT Sans", base_size = 14) +
+  theme(legend.position = c(.8, .8))
+
+data %>% 
+  filter(value_reported > 85000, value_reported < 95000)
 
 data %>% 
   filter(ratio != Inf, ratio < 3) %>% 
@@ -174,6 +201,17 @@ data %>%
   group_by(year, diff_category) %>% 
   summarise(n = n()) %>% 
   spread(diff_category, n)
+
+data %>% 
+  filter(name == "Norilsk") %>% 
+  mutate(reported_is_lower = if_else(value_reported - value_remote < 0, 1, 0)) %>% 
+  group_by(reported_is_lower) %>% 
+  summarise(n = n())
+
+data %>% 
+  filter(name == "Norilsk") %>% 
+  summarise(max_ratio = max(ratio),
+            min_ratio = min(ratio))
 
 sim_data <- data.frame(reported = data$value_reported)
 sim_data$diff = rnorm(251, sd = 0.5) * sim_data$reported
