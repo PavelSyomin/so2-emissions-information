@@ -176,17 +176,19 @@ median_values_without_Norilsk <- data %>%
 plot_1 <- data %>% 
   filter(name != "Norilsk") %>% 
   gather(data_source, amount, value_reported, value_remote) %>% 
-  ggplot(aes(x = amount, fill = data_source)) +
-  geom_histogram(binwidth = 10000, boundary = 0, position = position_dodge2(padding = .5, width = 2)) +
-  geom_vline(xintercept = median_values_without_Norilsk$remote, color = "#969696", linetype = "dashed", size = 1) +
-  geom_vline(xintercept = median_values_without_Norilsk$reported, color = "#252525", linetype = "dotted", size = 1, show.legend = TRUE) +
-  scale_fill_manual(name = "Источник данных", values = c("#ffffff", "#252525"), labels = c("Дистанционные измерения", "Официальная отчётность")) +
-  scale_linetype_manual(name = "Медиана выбросов", values = c("dotted", "dashed"), labels = c("Дистанционные измерения", "Официальная информация")) +
+  ggplot(aes(x = amount, linetype = data_source)) +
+  geom_freqpoly(binwidth = 10000, boundary = 0, position = position_dodge2(padding = .5, width = 2)) +
+  geom_vline(xintercept = median_values_without_Norilsk$remote, linetype = "dashed", color = "gray50") +
+  geom_vline(xintercept = median_values_without_Norilsk$reported, linetype = "solid", color = "gray50") +
+  scale_linetype_manual(name = "Источник данных", values = c("dashed", "solid"), labels = c("Дистанционные измерения", "Официальная отчётность")) +
   scale_x_continuous(labels = function(x) format(x, scientific = FALSE)) +
   scale_y_continuous(expand = expand_scale(add = c(0, 3))) +
+  annotate(geom = "text", label = paste0("M[отчёт] == ", format(median_values_without_Norilsk$reported, digits = 0, scientific = FALSE)), x = median_values_without_Norilsk$reported, y = 45, angle = 90, hjust = -0.1, vjust = 1.3, parse = TRUE, family = "PT Sans") +
+  annotate(geom = "text", label = paste0("M[дист.] == ", format(median_values_without_Norilsk$remote, digits = 0, scientific = FALSE)), x = median_values_without_Norilsk$remote, y = 45, angle = 90, hjust = -0.1, vjust = 1.3, parse = TRUE, family = "PT Sans") +
   labs(x = "Объём выбросов, тысяч тонн в год", y = "Число источников загрязнения") +
   theme_bw(base_family = "PT Sans", base_size = 14) +
-  theme(legend.position = c(.8, .8))
+  theme(legend.position = c(.8, .8), panel.grid.minor.y = element_line(size = 0))
+plot_1
 
 data %>% 
   filter(value_reported > 85000, value_reported < 95000)
