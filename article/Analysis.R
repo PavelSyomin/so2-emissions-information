@@ -229,3 +229,28 @@ sim_data %>%
 
 nrow(sim_data[sim_data$ratio == Inf, ])
 shapiro.test(sim_data$ratio)
+
+
+# A nice plot of remote and reported emissions in Norilsk, just for fun
+data %>% 
+  filter(name == "Norilsk") %>% 
+  gather(source, amount, value_reported:value_remote) %>% 
+  ggplot(aes(x = year, y = amount / 1e+6, color = source)) +
+  geom_line() +
+  geom_point(shape = 21, size = 2, fill = "gray10", stroke = 1.5) +
+  geom_smooth(method = "lm", se = FALSE, size = 1, linetype = "dotted", show.legend = FALSE) +
+  scale_x_continuous(name = "", breaks = seq(2006, 2020, 2)) +
+  scale_y_continuous(name = "", labels = function(x) format(x, decimal.mark = ",")) +
+  scale_color_manual(name = "", labels = c("Спутник", "Отчётность"), values = c("#B88900", "gray80")) +
+  labs(title = "Выбросы диоксида серы в Норильске", subtitle = "В миллионах тонн за 2005–2019 годы по спутниковым данным и официальной отчётности", caption = "Источники: https://so2.gsfc.nasa.gov/measures.html, https://www.nornickel.ru/sustainability/reporting/,\nhttp://www.mpr.krskstate.ru/envir/page5849") +
+  theme_minimal(base_size = 16, base_family = "PT Sans") +
+  theme(plot.background = element_rect(fill ="gray10"),
+        text = element_text(color = "white"), 
+        panel.grid.major.x = element_blank(),
+        panel.grid.minor = element_blank(),
+        panel.grid.major.y = element_line(color = "gray30", size = 0.25, linetype = "solid"),
+        axis.text = element_text(color = "gray60"),
+        legend.justification = c(0, 1),
+        legend.position = c(0.1, 1),
+        plot.subtitle = element_text(size = rel(1)),
+        aspect.ratio = 9/16)
