@@ -14,14 +14,17 @@ $endfor$
 $if(udk_code)$
 <text:p>$udk_code$</text:p>
 $endif$
-$for(author.ru)$
-<text:p text:style-name="Author">$author.ru$</text:p>
-$endfor$
 $if(title.ru)$
 <text:p text:style-name="Title">$title.ru$</text:p>
 $endif$
+$for(author.ru)$
+<text:p text:style-name="Author">$author.ru$</text:p>
+$endfor$
 $if(date)$
 <text:p text:style-name="Date">$date$</text:p>
+$endif$
+$if(affiliation.ru)$
+<text:p text:style-name="Основной текст">$affiliation.ru$</text:p>
 $endif$
 $if(abstract.ru)$
 <text:p text:style-name="Основной текст">$abstract.ru$</text:p>
@@ -160,11 +163,14 @@ $if(toc)$
 </text:table-of-content>
 $endif$
 $body$
+$if(title.en)$
+<text:p text:style-name="Title">$title.en$</text:p>
+$endif$
 $for(author.en)$
 <text:p text:style-name="Author">$author.en$</text:p>
 $endfor$
-$if(title.en)$
-<text:p text:style-name="Title">$title.en$</text:p>
+$if(affiliation.en)$
+<text:p text:style-name="Основной текст">$affiliation.en$</text:p>
 $endif$
 $if(abstract.en)$
 <text:p text:style-name="Основной текст">$abstract.en$</text:p>
