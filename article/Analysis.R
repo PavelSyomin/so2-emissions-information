@@ -31,6 +31,8 @@ reported_by_year <- reported_emissions %>%
   summarise(value_reported = summarise_reported(value)) %>% 
   drop_na(value_reported)
 
+nrow_reported <- nrow(reported_by_year)
+
 # See for how many years the amount of pollution is known by each pollution source. The maximum is 15.
 reported_nrows_filled <- reported_by_year %>% group_by(name) %>% summarise(nrows_filed = n())
 
