@@ -156,7 +156,7 @@ median(data$value_remote)
 median(data$value_reported)
 median(data$value_remote - data$value_reported)
 # Next, perform a Wilcoxon test (not t-test, because the distribution is not normal)
-wilcox.test(data$value_remote, data$value_reported, paired = TRUE, conf.int = TRUE)
+medians_comparison <- wilcox.test(data$value_remote, data$value_reported, paired = TRUE, conf.int = TRUE)
 
 # Do the same for large pollution sources (more than 100 Kt per year) only
 # Do the same for data without Norilsk
@@ -179,7 +179,7 @@ plot_1 <- data %>%
   filter(name != "Norilsk") %>% 
   gather(data_source, amount, value_reported, value_remote) %>% 
   ggplot(aes(x = amount, linetype = data_source)) +
-  geom_freqpoly(binwidth = 10000, boundary = 0, position = position_dodge2(padding = .5, width = 2)) +
+  geom_freqpoly(binwidth = 10000, boundary = 0) +
   geom_vline(xintercept = median_values_without_Norilsk$remote, linetype = "dashed", color = "gray50") +
   geom_vline(xintercept = median_values_without_Norilsk$reported, linetype = "solid", color = "gray50") +
   scale_linetype_manual(name = "Источник данных", values = c("dashed", "solid"), labels = c("Дистанционные измерения", "Официальная отчётность")) +
@@ -256,3 +256,25 @@ data %>%
         legend.position = c(0.1, 1),
         plot.subtitle = element_text(size = rel(1)),
         aspect.ratio = 9/16)
+
+# A plot of reported data availability by year and pollution source
+rep_data_avail_plot <- reported_emissions %>% 
+  mutate(name = as.factor(name)) %>% 
+  group_by(name, year) %>% 
+  summarise(value_reported = summarise_reported(value)) %>% 
+  ungroup() %>% 
+  mutate(has_reported_data = if_else(is.na(value_reported), 0, 1),
+         has_reported_data = factor(has_reported_data, levels = c(0, 1), labels = c("No", "Yes")),
+         name = factor(name, levels = rev(levels(name)))) %>% 
+  select(-value_reported) %>% 
+  ggplot(aes(x = year, y = name)) +
+  geom_tile(aes(fill = has_reported_data), color = "white") +
+  scale_x_continuous(name = "Год", breaks = 2005:2019, expand = expand_scale(0)) +
+  scale_y_discrete(name = "Источник выбросов", expand = expand_scale(0)) +
+  scale_fill_manual(name = "Отчётные данные", values = c("grey20", "grey80"), labels = c("Отсутствуют", "Имеются")) +
+  theme(text = element_text(family = "PT Sans", size = 14),
+        legend.position = "top",
+        legend.justification = "left",
+        legend.direction = "horizontal",
+        legend.key.width = unit(1, "cm"))
+  
