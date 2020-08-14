@@ -200,11 +200,12 @@ data %>%
   ggplot(aes(x = ratio)) +
   geom_histogram(binwidth = 0.1, color = "red")
 
-data %>% 
-  filter(value_remote > 0.5e+5) %>% 
+table_3 <- data %>% 
+  filter(value_remote > 5e+4) %>% 
   group_by(year, diff_category) %>% 
   summarise(n = n()) %>% 
-  spread(diff_category, n)
+  spread(diff_category, n, fill = 0) %>% 
+  select(year, lt_remote = `-1`, eq_remote = `0`, gt_remote = `1`)
 
 data %>% 
   filter(name == "Norilsk") %>% 
