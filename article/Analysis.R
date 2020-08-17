@@ -273,9 +273,13 @@ rep_data_avail_plot <- reported_emissions %>%
   scale_x_continuous(name = "Год", breaks = 2005:2019, expand = expand_scale(0)) +
   scale_y_discrete(name = "Источник выбросов", expand = expand_scale(0)) +
   scale_fill_manual(name = "Отчётные данные", values = c("grey20", "grey80"), labels = c("Отсутствуют", "Имеются")) +
-  theme(text = element_text(family = "PT Sans", size = 14),
+  theme(text = element_text(family = "PT Sans", size = 12),
         legend.position = "top",
         legend.justification = "left",
         legend.direction = "horizontal",
         legend.key.width = unit(1, "cm"))
   
+data %>%
+  filter(name == "Norilsk" | name == "Nickel+Severonikel" | name == "Cherepovetskaya" | name == "Kostomuksha") %>% 
+  group_by(diff_category) %>%
+  summarise(n = n())
