@@ -268,5 +268,5 @@ data %>%
   group_by(diff_category) %>%
   summarise(n = n())
 
-ggsave(filename = "График_1.png", plot = rep_data_avail_plot, width = 8, height = 6, dpi = 300)
-  
+ggsave(filename = "График_1.png", plot = rep_data_avail_plot, width = 8, height = 6)
+ggsave(filename = "График_2.png", plot = emissions_distr_plot, width = 8, height = 6)  
