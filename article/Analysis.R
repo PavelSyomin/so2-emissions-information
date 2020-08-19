@@ -31,6 +31,7 @@ reported_by_year <- reported_emissions %>%
   summarise(value_reported = summarise_reported(value)) %>% 
   drop_na(value_reported)
 
+# Number of filled in values in reported data; used in the article
 nrow_reported <- nrow(reported_by_year)
 
 # See for how many years the amount of pollution is known by each pollution source. The maximum is 15.
@@ -78,7 +79,7 @@ data <- remote_by_year %>%
 # If the amount is smaller that 50 Kt per year, the uncertainty is more than 67%.
 # As a logical consequence, if the amount is between 50 and 100 Kt, the uncertainty is 67%.
 # (Yes, we can't say for sure what the uncertainty for 50–100 Kt per year is, but it's the most straightforward assumption)
-# Also we can't set uncertainty for less than 50 Kt to “more than 67%”, because we heed a constant value. Let it bee 0.79.
+# Also we can't set uncertainty for less than 50 Kt to “more than 67%”, because we heed a constant value. 
 # See Fioletov et al., 2016. A global catalogue of large SO 2 sources and emissions derived from the Ozone Monitoring Instrument. P. 11503.
 # Function is to be used in apply()
 # Receives x, a vector of two, where x[1] is amount of emissions measured from a satellite, and x[2] is reported/remote ratio
@@ -130,6 +131,7 @@ data %>%
   group_by(diff_category) %>% 
   summarise(n = n())
 
+# Prepare a table with number of difference categories in each of three groups by amount of pollution
 table_1 <- data %>% 
   mutate(amount_group = cut(value_remote, c(0, 50000, 100000, 1e+7), labels = c("lt50", "50to100", "gt100"), include.lowest = TRUE)) %>% 
   group_by(diff_category, amount_group) %>% 
@@ -140,6 +142,7 @@ table_1 <- data %>%
   mutate(amount_group = factor(amount_group, labels = c("До 50 тысяч тонн", "От 50 до 100 тысяч тонн", "Больше 100 тысяч тонн"))) %>% 
   replace_na(replace = list(gt_remote = 0))
 
+# Prapare a table with number of two variants of difference between remote and reported values grouped by the amount of emissions
 table_2 <- data %>% 
   mutate(amount_group = cut(value_remote, c(0, 50000, 100000, 1e+7), labels = c("lt50", "50to100", "gt100"), include.lowest = TRUE),
          reported_is_lower = if_else(diff < 0, 1, 0),
@@ -161,21 +164,22 @@ medians_comparison <- wilcox.test(data$value_remote, data$value_reported, paired
 # Do the same for large pollution sources (more than 100 Kt per year) only
 # Do the same for data without Norilsk
 data %>% 
-  dplyr::filter(value_remote > 1e+5) %>% 
+  filter(value_remote > 1e+5) %>% 
   gather(data_source, value, value_remote:value_reported) %>% 
   group_by(data_source) %>% summarise(median = median(value))
 
 data %>% 
-  dplyr::filter(value_remote > 1e+5) %>% 
+  filter(name != "Norilsk") %>% 
   gather(data_source, value, value_remote:value_reported) %>% 
   wilcox.test(value ~ data_source, .,  paired = TRUE, conf.int = TRUE)
 
+# Calculate medians of reported and remote values (exlcuding Norilsk)
 median_values_without_Norilsk <- data %>% 
   filter(name != "Norilsk") %>% 
   summarise(remote = median(value_remote),
             reported = median(value_reported))
-
-plot_1 <- data %>% 
+# Draw a plot with distribution of amount of emissions by data source — remote and reported
+emissions_distr_plot <- data %>% 
   filter(name != "Norilsk") %>% 
   gather(data_source, amount, value_reported, value_remote) %>% 
   ggplot(aes(x = amount, linetype = data_source)) +
@@ -190,16 +194,9 @@ plot_1 <- data %>%
   labs(x = "Объём выбросов, тысяч тонн в год", y = "Число источников загрязнения") +
   theme_bw(base_family = "PT Sans", base_size = 14) +
   theme(legend.position = c(.8, .8), panel.grid.minor.y = element_line(size = 0))
-plot_1
+emissions_distr_plot
 
-data %>% 
-  filter(value_reported > 85000, value_reported < 95000)
-
-data %>% 
-  filter(ratio != Inf, ratio < 3) %>% 
-  ggplot(aes(x = ratio)) +
-  geom_histogram(binwidth = 0.1, color = "red")
-
+# A table with number of difference categories by year (excluding sources with low amount of emissions)
 table_3 <- data %>% 
   filter(value_remote > 5e+4) %>% 
   group_by(year, diff_category) %>% 
@@ -207,32 +204,18 @@ table_3 <- data %>%
   spread(diff_category, n, fill = 0) %>% 
   select(year, lt_remote = `-1`, eq_remote = `0`, gt_remote = `1`)
 
+# A fast check of differences for Norilsk
 data %>% 
   filter(name == "Norilsk") %>% 
   mutate(reported_is_lower = if_else(value_reported - value_remote < 0, 1, 0)) %>% 
   group_by(reported_is_lower) %>% 
   summarise(n = n())
 
+# A fast check for reported/remote ratio in Norilsk
 data %>% 
   filter(name == "Norilsk") %>% 
   summarise(max_ratio = max(ratio),
             min_ratio = min(ratio))
-
-sim_data <- data.frame(reported = data$value_reported)
-sim_data$diff = rnorm(251, sd = 0.5) * sim_data$reported
-sim_data$remote = -50000 + sim_data$reported - sim_data$diff
-sim_data$remote[sim_data$remote < 0] <- 0
-sim_data$index = (sim_data$remote - sim_data$reported) / (sim_data$remote + sim_data$reported)
-sim_data$ratio <- sim_data$reported / sim_data$remote
-qplot(sim_data$index, geom = "histogram")
-sim_data %>% 
-  filter(ratio < 3, ratio > -3) %>% 
-  ggplot(aes(x = ratio)) + 
-  geom_histogram(binwidth = 0.1)
-
-nrow(sim_data[sim_data$ratio == Inf, ])
-shapiro.test(sim_data$ratio)
-
 
 # A nice plot of remote and reported emissions in Norilsk, just for fun
 data %>% 
@@ -279,7 +262,11 @@ rep_data_avail_plot <- reported_emissions %>%
         legend.direction = "horizontal",
         legend.key.width = unit(1, "cm"))
   
+# A fast check for difference categories for 4 point sources owned by companies with public non-financial reporting
 data %>%
   filter(name == "Norilsk" | name == "Nickel+Severonikel" | name == "Cherepovetskaya" | name == "Kostomuksha") %>% 
   group_by(diff_category) %>%
   summarise(n = n())
+
+ggsave(filename = "График_1.png", plot = rep_data_avail_plot, width = 8, height = 6, dpi = 300)
+  
