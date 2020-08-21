@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<style xmlns="http://purl.org/net/xbiblio/csl" class="in-text" version="1.0" demote-non-dropping-particle="display-and-sort" page-range-format="chicago">
+<style xmlns="http://purl.org/net/xbiblio/csl" class="in-text" version="1.0" demote-non-dropping-particle="display-and-sort" page-range-format="chicago" default-locale="ru-RU">
   <info>
     <title>Chicago Manual of Style 17th edition (author-date)</title>
     <id>http://www.zotero.org/styles/chicago-author-date</id>
@@ -43,6 +43,14 @@
       <term name="translator" form="verb-short">trans.</term>
       <term name="editortranslator" form="verb">edited and translated by</term>
       <term name="translator" form="short">trans.</term>
+    </terms>
+  </locale>
+  <locale xml:lang="ru">
+    <terms>
+      <term name="open-quote">“</term>
+      <term name="close-quote">”</term>
+      <term name="and">and</term>
+      <term name="et-al">et al.</term>
     </terms>
   </locale>
   <macro name="secondary-contributors">
@@ -132,16 +140,16 @@
           </if>
           <else>
             <names variable="author">
-            <name form="long" name-as-sort-order="first" sort-separator=", " delimiter=", " delimiter-precedes-last="never"/>
-            <label form="short" prefix=", "/>
-            <substitute>
-              <names variable="editor"/>
-              <names variable="translator"/>
-              <names variable="director"/>
-              <text macro="substitute-title"/>
-              <text macro="title"/>
-            </substitute>
-          </names>
+              <name form="long" name-as-sort-order="first" sort-separator=", " delimiter=", " delimiter-precedes-last="never"/>
+              <label form="short" prefix=", "/>
+              <substitute>
+                <names variable="editor"/>
+                <names variable="translator"/>
+                <names variable="director"/>
+                <text macro="substitute-title"/>
+                <text macro="title"/>
+              </substitute>
+            </names>
           </else>
         </choose>
       <text macro="recipient"/>
@@ -200,7 +208,7 @@
       </choose>
       <choose>
         <if type="webpage post-weblog" match="any">
-          <date variable="issued" form="text"/>
+          <date variable="issued" form="text" prefix="Accessed "/>
         </if>
       </choose>
       <choose>
@@ -640,6 +648,16 @@
       </else>
     </choose>
   </macro>
+    <macro name="language">
+    <choose>
+      <if variable="note" match="none">
+        <text value=". (In Russian)"/>
+      </if>
+      <else>
+        <text value="."/>
+      </else>
+    </choose>
+  </macro>
   <citation et-al-min="4" et-al-use-first="1" disambiguate-add-year-suffix="true" disambiguate-add-names="true" disambiguate-add-givenname="true" givenname-disambiguation-rule="primary-name" collapse="year" after-collapse-delimiter="; ">
     <layout prefix="(" suffix=")" delimiter="; ">
       <group delimiter=", ">
@@ -664,6 +682,7 @@
   </citation>
   <bibliography hanging-indent="true" et-al-min="11" et-al-use-first="7" entry-spacing="0" page-range-format="extended">
     <sort>
+      <key macro="language" sort="descending"/>
       <key macro="contributors"/>
       <key variable="issued"/>
       <key variable="title"/>

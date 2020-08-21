@@ -14,23 +14,23 @@ $endfor$
 $if(udk_code)$
 <text:p>$udk_code$</text:p>
 $endif$
-$if(title.ru)$
-<text:p text:style-name="Title">$title.ru$</text:p>
+$if(title)$
+<text:p text:style-name="Title">$title$</text:p>
 $endif$
-$for(author.ru)$
-<text:p text:style-name="Author">$author.ru$</text:p>
+$for(author)$
+<text:p text:style-name="Author">$author$</text:p>
 $endfor$
 $if(date)$
 <text:p text:style-name="Date">$date$</text:p>
 $endif$
-$if(affiliation.ru)$
-<text:p text:style-name="Основной текст">$affiliation.ru$</text:p>
+$if(affiliation)$
+<text:p text:style-name="Основной текст">$affiliation$</text:p>
 $endif$
-$if(abstract.ru)$
-<text:p text:style-name="Основной текст">$abstract.ru$</text:p>
+$if(abstract)$
+<text:p text:style-name="Основной текст">$abstract$</text:p>
 $endif$
-$if(keywords.ru)$
-<text:p text:style-name="Основной текст">$keywords.ru$</text:p>
+$if(keywords)$
+<text:p text:style-name="Основной текст">$keywords$</text:p>
 $endif$
 $for(include-before)$
 $include-before$
@@ -163,21 +163,6 @@ $if(toc)$
 </text:table-of-content>
 $endif$
 $body$
-$if(title.en)$
-<text:p text:style-name="Title">$title.en$</text:p>
-$endif$
-$for(author.en)$
-<text:p text:style-name="Author">$author.en$</text:p>
-$endfor$
-$if(affiliation.en)$
-<text:p text:style-name="Основной текст">$affiliation.en$</text:p>
-$endif$
-$if(abstract.en)$
-<text:p text:style-name="Основной текст">$abstract.en$</text:p>
-$endif$
-$if(keywords.en)$
-<text:p text:style-name="Основной текст">$keywords.en$</text:p>
-$endif$
 $for(include-after)$
 $include-after$
 $endfor$
