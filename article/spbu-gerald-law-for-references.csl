@@ -52,7 +52,7 @@
       <term name="and">and</term>
       <term name="et-al">et al.</term>
       <term name="volume">vol.</term>
-      <term name="month-08">August</term>
+      <term name="month-05">May</term>
     </terms>
   </locale>
   <macro name="secondary-contributors">
@@ -210,7 +210,7 @@
       </choose>
       <choose>
         <if type="webpage post-weblog" match="any">
-          <date variable="issued" prefix="Accessed ">
+          <date variable="accessed" prefix="Accessed ">
             <date-part name="month" suffix=" "/>
             <date-part name="day" suffix=", "/>
             <date-part name="year"/>

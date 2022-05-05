@@ -51,7 +51,7 @@
       <term name="close-quote">”</term>
       <term name="and">and</term>
       <term name="et-al">et al.</term>
-      <term name="month-08">August</term>
+      <term name="month-05">Май</term>
     </terms>
   </locale>
   <macro name="secondary-contributors">
@@ -209,11 +209,21 @@
       </choose>
       <choose>
         <if type="webpage post-weblog" match="any">
-          <date variable="issued" prefix="Accessed ">
-            <date-part name="month" suffix=" "/>
-            <date-part name="day" suffix=", "/>
-            <date-part name="year"/>
-          </date>
+          <group delimiter=" ">
+            <choose>
+              <if variable="note" match="none">
+                <text value="Дата обращения: "/>
+              </if>
+              <else>
+                <text value="Accessed"/>
+              </else>
+            </choose>
+            <date variable="accessed">
+              <date-part name="month" suffix=" "/>
+              <date-part name="day" suffix=", "/>
+              <date-part name="year"/>
+            </date>
+          </group>
         </if>
       </choose>
       <choose>
