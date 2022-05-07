@@ -26,8 +26,8 @@ $endif$
 $if(affiliation)$
 <text:p text:style-name="Основной текст">$affiliation$</text:p>
 $endif$
-$if(abstract)$
-<text:p text:style-name="Основной текст">$abstract$</text:p>
+$if(abstr)$
+<text:p text:style-name="Основной текст">$abstr$</text:p>
 $endif$
 $if(keywords)$
 <text:p text:style-name="Основной текст">$keywords$</text:p>
