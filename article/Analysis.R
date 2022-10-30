@@ -180,18 +180,18 @@ median_values_without_Norilsk <- data %>%
             reported = median(value_reported))
 # Draw a plot with distribution of amount of emissions by data source — remote and reported
 emissions_distr_plot <- data %>% 
-  filter(name != "Norilsk") %>% 
+  dplyr::filter(name != "Norilsk") %>% 
   gather(data_source, amount, value_reported, value_remote) %>% 
   ggplot(aes(x = amount, linetype = data_source)) +
   geom_freqpoly(binwidth = 10000, boundary = 0) +
   geom_vline(xintercept = median_values_without_Norilsk$remote, linetype = "dashed", color = "gray50") +
   geom_vline(xintercept = median_values_without_Norilsk$reported, linetype = "solid", color = "gray50") +
-  scale_linetype_manual(name = "Источник данных", values = c("dashed", "solid"), labels = c("Дистанционные измерения", "Официальная отчётность")) +
-  scale_x_continuous(labels = function(x) format(x, scientific = FALSE)) +
+  scale_linetype_manual(name = "Источник данных", values = c("dashed", "solid"), labels = c("Дистанционные измерения", "Официальная отчетность")) +
+  scale_x_continuous(labels = function(x) format(x, scientific = FALSE, big.mark = " ")) +
   scale_y_continuous(expand = expand_scale(add = c(0, 3))) +
-  annotate(geom = "text", label = paste0("M[отчёт] == ", format(median_values_without_Norilsk$reported, digits = 0, scientific = FALSE)), x = median_values_without_Norilsk$reported, y = 45, angle = 90, hjust = -0.1, vjust = 1.3, parse = TRUE, family = "PT Sans") +
+  annotate(geom = "text", label = paste0("M[отчет] == ", format(median_values_without_Norilsk$reported, digits = 0, scientific = FALSE)), x = median_values_without_Norilsk$reported, y = 45, angle = 90, hjust = -0.1, vjust = 1.3, parse = TRUE, family = "PT Sans") +
   annotate(geom = "text", label = paste0("M[дист.] == ", format(median_values_without_Norilsk$remote, digits = 0, scientific = FALSE)), x = median_values_without_Norilsk$remote, y = 45, angle = 90, hjust = -0.1, vjust = 1.3, parse = TRUE, family = "PT Sans") +
-  labs(x = "Объём выбросов, тысяч тонн в год", y = "Число источников загрязнения") +
+  labs(x = "Объем выбросов, тыс. тонн в год", y = "Число источников загрязнения") +
   theme_bw(base_family = "PT Sans", base_size = 14) +
   theme(legend.position = c(.8, .8), panel.grid.minor.y = element_line(size = 0))
 emissions_distr_plot
@@ -242,25 +242,31 @@ data %>%
         aspect.ratio = 9/16)
 
 # A plot of reported data availability by year and pollution source
+# Add Russian translation of names (used in a plot)
+names_en_ru <- read.csv("../data/names_en_ru.csv", )
+names_en_ru$X <-  NULL
+
 rep_data_avail_plot <- reported_emissions %>% 
   mutate(name = as.factor(name)) %>% 
   group_by(name, year) %>% 
   summarise(value_reported = summarise_reported(value)) %>% 
   ungroup() %>% 
+  inner_join(names_en_ru, by="name") %>% 
   mutate(has_reported_data = if_else(is.na(value_reported), 0, 1),
          has_reported_data = factor(has_reported_data, levels = c(0, 1), labels = c("No", "Yes")),
-         name = factor(name, levels = rev(levels(name)))) %>% 
+         name_ru = factor(name_ru, levels = sort(unique(name_ru), decreasing = TRUE))) %>% 
   select(-value_reported) %>% 
-  ggplot(aes(x = year, y = name)) +
-  geom_tile(aes(fill = has_reported_data), color = "white") +
+  ggplot(aes(x = year, y = name_ru)) +
+  geom_tile(aes(fill = has_reported_data), color = "black", size = .5) +
   scale_x_continuous(name = "Год", breaks = 2005:2019, expand = expand_scale(0)) +
   scale_y_discrete(name = "Источник выбросов", expand = expand_scale(0)) +
-  scale_fill_manual(name = "Отчётные данные", values = c("grey20", "grey80"), labels = c("Отсутствуют", "Имеются")) +
+  scale_fill_manual(name = "Отчетные данные", values = c("grey70", "white"), labels = c("Отсутствуют", "Имеются")) +
   theme(text = element_text(family = "PT Sans", size = 12),
         legend.position = "top",
         legend.justification = "left",
         legend.direction = "horizontal",
         legend.key.width = unit(1, "cm"))
+rep_data_avail_plot
   
 # A fast check for difference categories for 4 point sources owned by companies with public non-financial reporting
 data %>%
@@ -268,5 +274,10 @@ data %>%
   group_by(diff_category) %>%
   summarise(n = n())
 
-ggsave(filename = "График_1.png", plot = rep_data_avail_plot, width = 8, height = 6)
+ggsave(filename = "График_1.png", plot = rep_data_avail_plot, width = 9, height = 8)
 ggsave(filename = "График_2.png", plot = emissions_distr_plot, width = 8, height = 6)  
+
+ggsave(filename = "График_1.svg", plot = rep_data_avail_plot, width = 9, height = 8)
+ggsave(filename = "График_2.png", plot = emissions_distr_plot, width = 8, height = 6)  
+
+reported_emissions %>% distinct(name) %>% write.csv("names_en_ru.csv")
