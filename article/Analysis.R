@@ -278,6 +278,6 @@ ggsave(filename = "График_1.png", plot = rep_data_avail_plot, width = 9, h
 ggsave(filename = "График_2.png", plot = emissions_distr_plot, width = 8, height = 6)  
 
 ggsave(filename = "График_1.svg", plot = rep_data_avail_plot, width = 9, height = 8)
-ggsave(filename = "График_2.png", plot = emissions_distr_plot, width = 8, height = 6)  
+ggsave(filename = "График_2.svg", plot = emissions_distr_plot, width = 8, height = 6)  
 
 reported_emissions %>% distinct(name) %>% write.csv("names_en_ru.csv")
