@@ -260,7 +260,7 @@ rep_data_avail_plot <- reported_emissions %>%
   geom_tile(aes(fill = has_reported_data), color = "black", size = .5) +
   scale_x_continuous(name = "Год", breaks = 2005:2019, expand = expand_scale(0)) +
   scale_y_discrete(name = "Источник выбросов", expand = expand_scale(0)) +
-  scale_fill_manual(name = "Отчетные данные", values = c("grey70", "white"), labels = c("Отсутствуют", "Имеются")) +
+  scale_fill_manual(name = "Отчетные данные", values = c("white", "grey70"), labels = c("Отсутствуют", "Имеются")) +
   theme(text = element_text(family = "PT Sans", size = 12),
         legend.position = "top",
         legend.justification = "left",
